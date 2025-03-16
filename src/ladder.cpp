@@ -26,22 +26,23 @@ bool is_adjacent(const string& word1, const string& word2){
 }
 
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list){
-    queue<vector<string>> ladders;
+    queue<vector<string>> ladder_queue;
+    ladder_queue.push({begin_word});
     set<string> visited;
-    ladders.push({begin_word});
-
-    while(!ladders.empty()){
-        vector<string> path = ladders.front(); ladders.pop();
-        string last_word = path.back();
-
-        if(last_word == end_word) return path;
-
-        for(const string& word : word_list){
-            if(visited.find(word) == visited.end() && is_adjacent(last_word, word)){
-                vector<string> new_path = path;
-                new_path.push_back(word);
-                ladders.push(new_path);
-                visited.insert(word);
+    visited.insert(begin_word);
+    while(!ladder_queue.empty()){
+        vector<string> ladder = ladder_queue.front();
+        ladder_queue.pop();
+        string last_word = ladder.back();
+        for(string word : word_list){
+            if(is_adjacent(last_word, word)){
+                if(visited.find(word) == visited.end()){
+                    visited.insert(word);
+                    vector<string> new_ladder = ladder;
+                    new_ladder.push_back(word);
+                    if(word == end_word) return new_ladder;
+                    ladder_queue.push(new_ladder);
+                }
             }
         }
     }
