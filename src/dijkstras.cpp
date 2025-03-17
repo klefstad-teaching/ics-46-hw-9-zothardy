@@ -4,7 +4,7 @@
 #include <queue>
 
 vector<int> dijkstra_shortest_path(const Graph &G, int source, vector<int> &previous){
-    int numVertices = G.size();
+    int numVertices = G.numVertices;
     vector<int> distances(numVertices, INF);
     vector<bool> visited(numVertices, false);
     distances[source] = 0;
@@ -12,23 +12,22 @@ vector<int> dijkstra_shortest_path(const Graph &G, int source, vector<int> &prev
     previous.assign(numVertices, -1);
     //cout << "previous\n";
 
-    priority_queue<pair<int,int>> minHeap;
-    minHeap.push({source, 0});
+    priority_queue<pair<int,int>, vector<pair<int, int>>, greater<pair<int,int>>> minHeap;
+    minHeap.push({0, source});
 
     while(!minHeap.empty()){
-        //cout << "entered while loop\n";
-        int u = minHeap.top().first;
-        cout << u << endl;
+        int dist = minHeap.top().first;
+        int u = minHeap.top().second;
         minHeap.pop();
         if(visited[u]) continue;
         visited[u] = true;
         for(Edge edge : G[u]){
             int v = edge.dst;
             int weight = edge.weight;
-            if(!visited[v] && distances[u] + weight < distances[v]){
-                distances[v] = distances[u] + weight;
+            if(!visited[v] && dist + weight < distances[v]){
+                distances[v] = dist + weight;
                 previous[v] = u;
-                minHeap.push({v, distances[v]});
+                minHeap.push({distances[v], v});
             }
         }
 
@@ -37,12 +36,19 @@ vector<int> dijkstra_shortest_path(const Graph &G, int source, vector<int> &prev
 }
 
 vector<int> extract_shortest_path(const vector<int>& distances, const vector<int>& previous, int destination){
-    vector<int> path;
-    for(int at = destination; at != -1; at = previous[at]){
-        path.push_back(at);
+    vector<int> v;
+    stack<int> stk;
+
+    for(int i = destination; i != -1;){
+        stk.push(i);
+        i = previous[i];
     }
-    reverse(path.begin(), path.end());
-    return path;
+
+    while(!stk.empty()){
+        v.push_back(stk.top());
+        stk.pop();
+    }
+    return v;
 }
 
 void print_path(const vector<int>& path, int total){
